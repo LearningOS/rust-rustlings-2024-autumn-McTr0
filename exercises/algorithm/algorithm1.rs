@@ -2,11 +2,11 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
-use std::vec::*;
+use std::{clone, vec::*};
 
 #[derive(Debug)]
 struct Node<T> {
@@ -44,7 +44,9 @@ impl<T> LinkedList<T> {
         }
     }
 
-    pub fn add(&mut self, obj: T) {
+    pub fn add(&mut self, obj: T) 
+    
+    {
         let mut node = Box::new(Node::new(obj));
         node.next = None;
         let node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(node)) });
@@ -70,13 +72,45 @@ impl<T> LinkedList<T> {
         }
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+    where T:PartialOrd
 	{
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+		let mut result = Self::new();
+
+        let mut current_a = list_a.start;
+        let mut current_b = list_b.start;
+
+        while let (Some(node_a), Some(node_b)) = (current_a, current_b) {
+            unsafe {
+            if (*node_a.as_ptr()).val < (*node_b.as_ptr()).val {
+                current_a = (*node_a.as_ptr()).next;
+                (*node_a.as_ptr()).next = None;
+                result.add(Box::from_raw(node_a.as_ptr() ).val );
+            } else {
+                current_b = (*node_b.as_ptr()).next;
+                (*node_b.as_ptr()).next = None;
+                result.add( Box::from_raw(node_b.as_ptr() ).val );
+            }
+            }
         }
+
+        while let Some(node_a) = current_a {
+            unsafe {
+            current_a = (*node_a.as_ptr()).next;
+            (*node_a.as_ptr()).next = None;
+            result.add(Box::from_raw(node_a.as_ptr() ).val );
+            }
+        }
+
+        while let Some(node_b) = current_b {
+            unsafe {
+            current_b = (*node_b.as_ptr()).next;
+            (*node_b.as_ptr()).next = None;
+            result.add(Box::from_raw(node_b.as_ptr() ).val );
+            }
+        }
+
+        result
 	}
 }
 
